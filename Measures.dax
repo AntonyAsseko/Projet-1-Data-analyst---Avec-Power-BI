@@ -1,0 +1,89 @@
+1. Mesures de Performance (Executive Dashboard)
+Ces mesures donnent la vision globale de l'activité.
+
+-- Volume total des transactions
+Total Volume = SUM(Transactions[amount])
+
+-- Valeur vie client (Volume transactions + Montant des prêts)
+CLV = [Total Volume] + SUM(Loans[principal_amount])
+
+-- Profit net (Volume - Pertes liées aux défauts de paiement)
+Total Profit = 
+VAR Volume = [Total Volume]
+VAR Pertes = CALCULATE(SUM(Loans[amount]), Loans[status] = "default")
+RETURN
+Volume - Pertes
+
+2. Mesures Clients & Transactions (Customer Insights)
+Pour analyser le comportement et le volume d'activité.
+
+-- Nombre de clients uniques ayant effectué au moins une transaction > 0
+Active Customers = 
+CALCULATE(
+    DISTINCTCOUNT(Transactions[customer_id]),
+    Transactions[amount] > 0
+)
+
+-- Nombre total de lignes de transactions (Activité brute)
+Total Transactions = COUNTROWS(Transactions)
+
+3. Mesures de Risque & Crédit (Risk & Credit)
+Ces mesures utilisent les colonnes de statut et la relation inactive.
+
+-- Taux de défaut (Prêts en "default" / Nombre total de prêts)
+Default Rate = 
+DIVIDE(
+    CALCULATE(COUNTROWS(Loans), Loans[status] = "default"),
+    COUNTROWS(Loans),
+    0
+)
+
+-- Volume des prêts utilisant la relation inactive avec la table DimDate
+Volume Prêts (Actif) = 
+CALCULATE(
+    SUM(Loans[principal_amount]), 
+    USERELATIONSHIP(DimDate[Date], Loans[start_date])
+)
+
+4. Analyses Temporelles & Classement (Time Intelligence)
+Pour voir l'évolution et les performances relatives.
+
+-- Somme du volume sur les 30 derniers jours glissants
+Rolling 30d = 
+CALCULATE(
+    [Total Volume],
+    DATESINPERIOD(
+        DimDate[Date],
+        MAX(DimDate[Date]),
+        -30,
+        DAY
+    )
+)
+
+-- Évolution du volume (Mois en cours vs Mois précédent) avec Variables
+Volume Evolution = 
+VAR VolumeActuel = [Total Volume]
+VAR VolumePrecedent = CALCULATE([Total Volume], DATEADD(DimDate[Date], -1, MONTH))
+RETURN
+DIVIDE(VolumeActuel - VolumePrecedent, VolumePrecedent, 0)
+
+-- Classement des pays par volume
+Country Rank = 
+RANKX(
+    ALL(DimCountry),
+    [Total Volume],
+    ,
+    DESC
+)
+
+5. Mesure Dynamique (Sélecteur de KPI)
+
+KPI Dynamique = 
+VAR ChoixUtilisateur = SELECTEDVALUE('Sélecteur KPI'[Nom du KPI])
+RETURN
+SWITCH(
+    ChoixUtilisateur,
+    "Volume", [Total Volume],
+    "Taux de défaut", [Default Rate],
+    [Total Volume] -- Valeur affichée par défaut
+)
