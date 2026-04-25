@@ -82,10 +82,16 @@ Projet : Système d'Analyse Fintech & Risque de Crédit
         Explorez la navigation via les boutons et testez le sélecteur de KPI dynamique.
 
 ### Aperçu du Dashboard - Page Executive
-![Executive Dashboard](page1.png)
+![Executive Dashboard](Executive_Dashboard.PNG)
 
-### Aperçu du Dashboard - Page Customer Insights
-![Customer Insights](page2.png)
+### Aperçu du Dashboard - Page Customers
+![Customers Dashboard](Customers_Dashboard.PNG)
+
+### Aperçu du Dashboard - Page Risk
+![Risk Dashboard](Risk_Dashboard.PNG)
+
+### Aperçu Page Modele
+![Modele](Modele.PNG)
 
 
 Antony Asseko - Data Analyst
